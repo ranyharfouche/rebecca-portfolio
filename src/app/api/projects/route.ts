@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { kv } from '@vercel/kv';
 
-// In-memory storage for Vercel compatibility
-let projects: any[] = [
+// Initial projects data
+const initialProjects = [
   {
     id: 1,
     title: "Abandoned Horror Lab",
@@ -36,19 +37,35 @@ let projects: any[] = [
   }
 ];
 
-function readProjects() {
-  return projects;
+async function readProjects() {
+  try {
+    let projects = await kv.get('projects');
+    if (!projects) {
+      // Initialize with default data if empty
+      await kv.set('projects', JSON.stringify(initialProjects));
+      projects = await kv.get('projects');
+    }
+    return JSON.parse(projects as string);
+  } catch (error) {
+    console.error('Failed to read projects from KV:', error);
+    return initialProjects;
+  }
 }
 
-function writeProjects(newProjects: any[]) {
-  projects = newProjects;
+async function writeProjects(newProjects: any[]) {
+  try {
+    await kv.set('projects', JSON.stringify(newProjects));
+  } catch (error) {
+    console.error('Failed to write projects to KV:', error);
+  }
 }
 
 export async function GET() {
   try {
-    const projectsData = readProjects();
+    const projectsData = await readProjects();
     return NextResponse.json(projectsData);
   } catch (error) {
+    console.error('GET error:', error);
     return NextResponse.json({ error: 'Failed to read projects' }, { status: 500 });
   }
 }
@@ -56,7 +73,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const project = await request.json();
-    const projectsData = readProjects();
+    const projectsData = await readProjects();
     
     const newProject = {
       ...project,
@@ -64,10 +81,11 @@ export async function POST(request: NextRequest) {
     };
     
     projectsData.push(newProject);
-    writeProjects(projectsData);
+    await writeProjects(projectsData);
     
     return NextResponse.json(newProject);
   } catch (error) {
+    console.error('POST error:', error);
     return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
   }
 }
@@ -75,7 +93,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const updatedProject = await request.json();
-    const projectsData = readProjects();
+    const projectsData = await readProjects();
     
     const index = projectsData.findIndex((p: any) => p.id === updatedProject.id);
     if (index === -1) {
@@ -83,10 +101,11 @@ export async function PUT(request: NextRequest) {
     }
     
     projectsData[index] = updatedProject;
-    writeProjects(projectsData);
+    await writeProjects(projectsData);
     
     return NextResponse.json(updatedProject);
   } catch (error) {
+    console.error('PUT error:', error);
     return NextResponse.json({ error: 'Failed to update project' }, { status: 500 });
   }
 }
@@ -102,7 +121,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
     }
     
-    const projectsData = readProjects();
+    const projectsData = await readProjects();
     console.log('Current projects:', projectsData.length);
     
     const filteredProjects = projectsData.filter((p: any) => p.id !== id);
@@ -112,11 +131,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
     
-    writeProjects(filteredProjects);
+    await writeProjects(filteredProjects);
     console.log('Project deleted successfully');
     return NextResponse.json({ success: true, message: 'Project deleted successfully' });
   } catch (error) {
-    console.error('Delete error:', error);
+    console.error('DELETE error:', error);
     return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
   }
 }

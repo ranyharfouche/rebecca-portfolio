@@ -19,8 +19,8 @@ export default function Showcase() {
   useEffect(() => {
     fetchProjects();
     
-    // Set up polling to check for updates every 5 seconds
-    const interval = setInterval(fetchProjects, 5000);
+    // Set up polling to check for updates every 2 seconds for faster updates
+    const interval = setInterval(fetchProjects, 2000);
     
     return () => clearInterval(interval);
   }, []);
