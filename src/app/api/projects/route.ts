@@ -64,6 +64,8 @@ async function initializeDatabase() {
 
 export async function GET() {
   try {
+    console.log('=== GET OPERATION START ===');
+    
     // Initialize if needed
     await initializeDatabase();
     
@@ -72,11 +74,15 @@ export async function GET() {
       .select('*')
       .order('id');
     
+    console.log('Projects from database:', projects?.length || 0);
+    console.log('Projects data:', projects);
+    
     if (error) {
       console.error('GET error:', error);
       return NextResponse.json({ error: 'Failed to read projects' }, { status: 500 });
     }
     
+    console.log('=== GET OPERATION COMPLETE ===');
     return NextResponse.json(projects || []);
   } catch (error) {
     console.error('GET error:', error);
@@ -134,12 +140,28 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = parseInt(searchParams.get('id') || '');
     
+    console.log('=== DELETE OPERATION START ===');
     console.log('DELETE request received for ID:', id);
     
     if (!id) {
       return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
     }
     
+    // First, check if project exists
+    const { data: existingProject, error: checkError } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (checkError) {
+      console.log('Project not found:', checkError);
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+    
+    console.log('Project to delete:', existingProject);
+    
+    // Delete the project
     const { error } = await supabase
       .from('projects')
       .delete()
@@ -150,8 +172,19 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
     }
     
-    console.log('Project deleted successfully');
-    return NextResponse.json({ success: true, message: 'Project deleted successfully' });
+    // Verify deletion
+    const { data: remainingProjects } = await supabase
+      .from('projects')
+      .select('id');
+    
+    console.log('Projects remaining after delete:', remainingProjects?.length || 0);
+    console.log('=== DELETE OPERATION COMPLETE ===');
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Project deleted successfully',
+      remainingCount: remainingProjects?.length || 0
+    });
   } catch (error) {
     console.error('DELETE error:', error);
     return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
