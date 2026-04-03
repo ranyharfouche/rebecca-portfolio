@@ -48,25 +48,12 @@ export default function Footer() {
             </div>
             <p className="text-xs text-purple-300 mt-2">Instagram</p>
           </a>
-
-          <a
-            href="#"
-            className="group"
-          >
-            <div className="w-12 h-12 bg-purple-600/20 border border-purple-500/30 rounded-full flex items-center justify-center hover:bg-purple-600/30 hover:border-purple-400/50 transition-all duration-300">
-              <Link className="w-6 h-6 text-purple-300 group-hover:text-purple-200" />
-            </div>
-            <p className="text-xs text-purple-300 mt-2">New Link</p>
-          </a>
         </div>
 
         {/* Copyright */}
         <div className="border-t border-purple-500/20 pt-8">
           <p className="text-purple-300 text-sm mb-2">
-            © 2026 Rebecca Abi Younes. All Rights Reserved.
-          </p>
-          <p className="text-purple-400 text-xs">
-            Crafted with code and creativity.
+            © 2026 All Rights Reserved.
           </p>
         </div>
       </div>
