@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "src/app/api/**/*.ts": {
-      "runtime": "nodejs16.x"
+      "runtime": "@vercel/node"
     }
   }
 }
