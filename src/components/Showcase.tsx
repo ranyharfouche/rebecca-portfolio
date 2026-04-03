@@ -46,7 +46,7 @@ export default function Showcase() {
         }
         return prev + 1;
       });
-    }, 3000);
+    }, 4000); // Slower, more elegant scroll
 
     return () => clearInterval(interval);
   }, [projects.length]);
@@ -65,7 +65,7 @@ export default function Showcase() {
         {/* Auto-scrolling showcase */}
         <div className="relative overflow-hidden">
           <div 
-            className="flex transition-transform duration-700 ease-in-out"
+            className="flex transition-transform duration-1000 ease-in-out"
             style={{ transform: `translateX(-${scrollPosition * 33.333}%)` }}
           >
             {[...projects, ...projects, ...projects].map((project, index) => (
