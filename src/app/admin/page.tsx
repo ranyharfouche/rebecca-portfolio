@@ -108,12 +108,20 @@ export default function AdminDashboard() {
 
   const handleAddProject = async () => {
     try {
+      console.log('Adding project:', newProject);
+      
       const response = await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newProject)
       });
+      
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
+        const addedProject = await response.json();
+        console.log('Successfully added:', addedProject);
+        
         fetchProjects();
         setNewProject({
           id: 0,
@@ -124,8 +132,14 @@ export default function AdminDashboard() {
           image: ''
         });
         setPlatformInput('');
+        alert('Project added successfully!');
+      } else {
+        const errorData = await response.json();
+        console.error('Add error:', errorData);
+        alert(`Failed to add project: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
+      console.error('Add error:', error);
       alert('Failed to add project');
     }
   };

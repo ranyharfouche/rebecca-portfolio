@@ -92,23 +92,37 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== POST OPERATION START ===');
     const project = await request.json();
     
-    const { data: newProject, error } = await supabase
+    console.log('Received project data:', project);
+    
+    // Generate a proper ID using timestamp + random
+    const newProject = {
+      ...project,
+      id: Date.now() + Math.floor(Math.random() * 1000),
+    };
+    
+    console.log('Project to insert:', newProject);
+    
+    const { data: insertedProject, error } = await supabase
       .from('projects')
-      .insert([project])
+      .insert([newProject])
       .select()
       .single();
     
     if (error) {
       console.error('POST error:', error);
-      return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to create project', details: error }, { status: 500 });
     }
     
-    return NextResponse.json(newProject);
+    console.log('Successfully inserted:', insertedProject);
+    console.log('=== POST OPERATION COMPLETE ===');
+    
+    return NextResponse.json(insertedProject);
   } catch (error) {
     console.error('POST error:', error);
-    return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create project', details: error }, { status: 500 });
   }
 }
 
