@@ -6,13 +6,13 @@ export default function OtherPassions() {
       title: "Certified Personal Trainer",
       organization: "Inspire Fitness Academy",
       period: "Freelance | Present",
-      description: "Helping clients achieve their fitness goals through personalized training programs and nutritional guidance. Combining my passion for health and wellness with technical expertise to create effective, science-based fitness solutions."
+      description: "Helping individuals improve strength, mobility, and overall performance through customized training programs. Focused on calisthenics, gym training, and long-term functional health."
     },
     {
       title: "BA in Computer Graphics & Animation",
       organization: "Notre Dame University - Louaize",
       period: "2023-2025",
-      description: "Comprehensive study of 3D modeling, animation, visual effects, and digital art techniques. Mastering industry-standard software and developing a strong foundation in both artistic principles and technical execution."
+      description: "Completed second year of studies, focusing on 3D modeling, animation, and visual effects."
     }
   ];
 
