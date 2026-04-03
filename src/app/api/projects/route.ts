@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
 
 // Initial projects data
 const initialProjects = [
@@ -37,27 +36,43 @@ const initialProjects = [
   }
 ];
 
+// Fallback in-memory storage for immediate functionality
+let fallbackProjects = [...initialProjects];
+
+// Hybrid storage: Try KV first, fallback to memory
 async function readProjects() {
   try {
-    let projects = await kv.get('projects');
-    if (!projects) {
-      // Initialize with default data if empty
-      await kv.set('projects', JSON.stringify(initialProjects));
-      projects = await kv.get('projects');
+    // Try Vercel KV if available
+    if (process.env.KV_URL) {
+      const { kv } = await import('@vercel/kv');
+      let projects = await kv.get('projects');
+      if (!projects) {
+        await kv.set('projects', JSON.stringify(initialProjects));
+        projects = await kv.get('projects');
+      }
+      return JSON.parse(projects as string);
     }
-    return JSON.parse(projects as string);
   } catch (error) {
-    console.error('Failed to read projects from KV:', error);
-    return initialProjects;
+    console.log('KV not available, using fallback storage');
   }
+  
+  // Fallback to in-memory
+  return fallbackProjects;
 }
 
 async function writeProjects(newProjects: any[]) {
   try {
-    await kv.set('projects', JSON.stringify(newProjects));
+    // Try Vercel KV if available
+    if (process.env.KV_URL) {
+      const { kv } = await import('@vercel/kv');
+      await kv.set('projects', JSON.stringify(newProjects));
+    }
   } catch (error) {
-    console.error('Failed to write projects to KV:', error);
+    console.log('KV not available, using fallback storage');
   }
+  
+  // Always update fallback
+  fallbackProjects = [...newProjects];
 }
 
 export async function GET() {
