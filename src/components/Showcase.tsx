@@ -8,7 +8,6 @@ interface Project {
   title: string;
   category: string;
   description: string;
-  platforms: string[];
   image: string;
 }
 
@@ -90,17 +89,7 @@ export default function Showcase() {
                     <p className="text-purple-300 text-sm mb-3">{project.category}</p>
                     <p className="text-white/70 text-sm mb-4 line-clamp-3">{project.description}</p>
                     
-                    <div className="mb-4">
-                      <p className="text-purple-300 text-xs font-semibold mb-2">Platforms/Tech:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {project.platforms.map((platform, idx) => (
-                          <span key={idx} className="text-xs bg-purple-600/30 text-purple-200 px-2 py-1 rounded">
-                            {platform}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    
+                                        
                     <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors duration-300">
                       <Info className="w-4 h-4" />
                       Details

@@ -8,7 +8,6 @@ interface Project {
   title: string;
   category: string;
   description: string;
-  platforms: string[];
   image: string;
 }
 
@@ -22,10 +21,8 @@ export default function AdminDashboard() {
     title: '',
     category: '',
     description: '',
-    platforms: [],
     image: ''
   });
-  const [platformInput, setPlatformInput] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [editSelectedImage, setEditSelectedImage] = useState<File | null>(null);
@@ -207,10 +204,8 @@ export default function AdminDashboard() {
           title: '',
           category: '',
           description: '',
-          platforms: [],
           image: ''
         });
-        setPlatformInput('');
         setSelectedImage(null);
         setImagePreview('');
         alert('Project added successfully!');
@@ -251,23 +246,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const addPlatform = (project: Project, input: string, setter: Function) => {
-    if (input.trim()) {
-      setter({
-        ...project,
-        platforms: [...project.platforms, input.trim()]
-      });
-      setPlatformInput('');
-    }
-  };
-
-  const removePlatform = (project: Project, platform: string, setter: Function) => {
-    setter({
-      ...project,
-      platforms: project.platforms.filter(p => p !== platform)
-    });
-  };
-
+  
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -379,38 +358,7 @@ export default function AdminDashboard() {
               onChange={(e) => setNewProject({ ...newProject, image: e.target.value })}
               className="px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white placeholder-purple-400 focus:outline-none focus:border-purple-400 md:col-span-2"
             />
-            <div className="md:col-span-2">
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="Add platform"
-                  value={platformInput}
-                  onChange={(e) => setPlatformInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPlatform(newProject, platformInput, setNewProject))}
-                  className="flex-1 px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white placeholder-purple-400 focus:outline-none focus:border-purple-400"
-                />
-                <button
-                  onClick={() => addPlatform(newProject, platformInput, setNewProject)}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {newProject.platforms.map((platform, index) => (
-                  <span key={index} className="bg-purple-600/30 text-purple-200 px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                    {platform}
-                    <button
-                      onClick={() => removePlatform(newProject, platform, setNewProject)}
-                      className="hover:text-red-400"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+                      </div>
           <button
             onClick={handleAddProject}
             className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
@@ -542,14 +490,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <p className="text-white/80 mb-3">{project.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {project.platforms.map((platform, index) => (
-                      <span key={index} className="bg-purple-600/30 text-purple-200 px-3 py-1 rounded-full text-sm">
-                        {platform}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                                  </div>
               )}
             </div>
           ))}

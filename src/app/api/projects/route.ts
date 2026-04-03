@@ -8,7 +8,6 @@ const initialProjects = [
     title: "Abandoned Horror Lab",
     category: "3D Environment",
     description: "A hauntingly detailed horror environment featuring abandoned laboratory equipment and eerie atmospheric lighting.",
-    platforms: ["3ds Max", "Substance Painter", "Unreal Engine"],
     image: "https://images.unsplash.com/photo-1558655146-d09347e92766?w=400&h=300&fit=crop"
   },
   {
@@ -16,7 +15,6 @@ const initialProjects = [
     title: "Female Body",
     category: "Character Modeling",
     description: "Anatomically accurate female character model with detailed topology and realistic texturing.",
-    platforms: ["Zbrush", "Marvelous Designer", "Substance Painter"],
     image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop"
   },
   {
@@ -24,7 +22,6 @@ const initialProjects = [
     title: "Armor",
     category: "Hard Surface Modeling",
     description: "Intricately designed fantasy armor with detailed engravings and realistic material properties.",
-    platforms: ["3ds Max", "Zbrush", "Substance Painter"],
     image: "https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=400&h=300&fit=crop"
   },
   {
@@ -32,7 +29,6 @@ const initialProjects = [
     title: "Robot",
     category: "Mechanical Design",
     description: "Futuristic robot design with complex mechanical parts and weathered industrial aesthetics.",
-    platforms: ["3ds Max", "Zbrush", "Adobe After Effects"],
     image: "https://images.unsplash.com/photo-1561518776-e045b6afac2e?w=400&h=300&fit=crop"
   }
 ];
