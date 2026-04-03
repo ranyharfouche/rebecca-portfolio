@@ -28,6 +28,8 @@ export default function AdminDashboard() {
   const [platformInput, setPlatformInput] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [editSelectedImage, setEditSelectedImage] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string>('');
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -72,17 +74,70 @@ export default function AdminDashboard() {
 
   const handleSaveProject = async (project: Project) => {
     try {
+      console.log('Saving project:', project);
+      
+      // Handle image upload if selected
+      let imageUrl = project.image;
+      if (editSelectedImage) {
+        const formData = new FormData();
+        formData.append('file', editSelectedImage);
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          imageUrl = uploadData.url;
+        } else {
+          alert('Failed to upload image');
+          return;
+        }
+      }
+      
+      const projectToSave = { ...project, image: imageUrl };
+      
       const response = await fetch('/api/projects', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(project)
+        body: JSON.stringify(projectToSave)
       });
       if (response.ok) {
         fetchProjects();
         setEditingProject(null);
+        setEditSelectedImage(null);
+        setEditImagePreview('');
+        alert('Project saved successfully!');
       }
     } catch (error) {
       alert('Failed to save project');
+    }
+  };
+
+  const handleEditImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size must be less than 5MB');
+        return;
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      setEditSelectedImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setEditImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -390,11 +445,43 @@ export default function AdminDashboard() {
                       className="px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-400 md:col-span-2"
                       rows={3}
                     />
+                    {/* Edit Image Upload */}
+                    <div className="md:col-span-2">
+                      <label className="block mb-2">
+                        <span className="text-purple-300 text-sm">Project Image (Recommended: 1200x800px, Max 5MB)</span>
+                      </label>
+                      <div className="flex gap-4 items-start">
+                        <div className="flex-1">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleEditImageSelect}
+                            className="w-full px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                          />
+                          {editSelectedImage && (
+                            <p className="text-xs text-purple-400 mt-2">
+                              Selected: {editSelectedImage.name} ({(editSelectedImage.size / 1024 / 1024).toFixed(2)} MB)
+                            </p>
+                          )}
+                        </div>
+                        {editImagePreview && (
+                          <div className="w-24 h-24 border-2 border-purple-500/30 rounded-lg overflow-hidden">
+                            <img
+                              src={editImagePreview}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
                     <input
                       type="url"
+                      placeholder="Or Image URL (if not uploading)"
                       value={editingProject.image}
                       onChange={(e) => setEditingProject({ ...editingProject, image: e.target.value })}
-                      className="px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-400 md:col-span-2"
+                      className="px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white placeholder-purple-400 focus:outline-none focus:border-purple-400 md:col-span-2"
                     />
                   </div>
                   <div className="flex gap-2">
