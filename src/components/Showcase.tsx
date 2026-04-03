@@ -104,22 +104,6 @@ export default function Showcase() {
             ))}
           </div>
         </div>
-        
-        {/* Project thumbnails */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {projects.map((project) => (
-            <div key={project.id} className="relative group overflow-hidden rounded-lg">
-              <img
-                src={project.image}
-                alt={project.title}
-                className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                <p className="text-white text-sm font-medium p-3">{project.title}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
