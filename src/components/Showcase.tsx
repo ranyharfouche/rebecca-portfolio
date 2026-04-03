@@ -15,6 +15,7 @@ interface Project {
 export default function Showcase() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -39,17 +40,27 @@ export default function Showcase() {
     if (projects.length === 0) return;
     
     const interval = setInterval(() => {
-      setScrollPosition((prev) => {
-        const maxScroll = projects.length - 3;
-        if (prev >= maxScroll) {
-          return 0;
-        }
-        return prev + 1;
-      });
+      if (!isPaused) {
+        setScrollPosition((prev) => {
+          const maxScroll = projects.length - 3;
+          if (prev >= maxScroll) {
+            return 0;
+          }
+          return prev + 1;
+        });
+      }
     }, 4000); // Slower, more elegant scroll
 
     return () => clearInterval(interval);
-  }, [projects.length]);
+  }, [projects.length, isPaused]);
+
+  const handleMouseEnter = () => {
+    setIsPaused(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsPaused(false);
+  };
 
   if (projects.length === 0) {
     return <div className="py-20 text-center">Loading projects...</div>;
@@ -63,7 +74,11 @@ export default function Showcase() {
         </h2>
         
         {/* Auto-scrolling showcase */}
-        <div className="relative overflow-hidden">
+        <div 
+          className="relative overflow-hidden"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <div 
             className="flex transition-transform duration-1000 ease-in-out"
             style={{ transform: `translateX(-${scrollPosition * 33.333}%)` }}
