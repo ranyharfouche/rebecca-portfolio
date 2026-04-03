@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 export default function About() {
   const skills = [
     '3ds Max',
@@ -8,6 +10,24 @@ export default function About() {
     'Zbrush',
     'Substance Painter'
   ];
+
+  const [aboutImage, setAboutImage] = useState('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=600&h=400&fit=crop');
+
+  useEffect(() => {
+    fetchAboutImage();
+  }, []);
+
+  const fetchAboutImage = async () => {
+    try {
+      const response = await fetch('/api/hero-about');
+      const data = await response.json();
+      if (data.aboutImage) {
+        setAboutImage(data.aboutImage);
+      }
+    } catch (error) {
+      console.error('Failed to fetch about image:', error);
+    }
+  };
 
   return (
     <div className="py-20 px-4 md:px-8 lg:px-16">
@@ -42,7 +62,7 @@ export default function About() {
           <div className="relative">
             <div className="rounded-lg overflow-hidden shadow-2xl">
               <img
-                src="https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=600&h=400&fit=crop"
+                src={aboutImage}
                 alt="Workspace with dual monitors"
                 className="w-full h-auto"
               />

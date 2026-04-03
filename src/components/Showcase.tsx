@@ -13,8 +13,8 @@ interface Project {
 
 export default function Showcase() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -35,23 +35,7 @@ export default function Showcase() {
     }
   };
 
-  useEffect(() => {
-    if (projects.length === 0) return;
-    
-    const interval = setInterval(() => {
-      setScrollPosition((prev) => {
-        const cardWidth = 33.333; // 33.333% for 3 cards visible
-        const maxScroll = projects.length * cardWidth;
-        if (prev >= maxScroll) {
-          return 0;
-        }
-        return prev + cardWidth;
-      });
-    }, 3000); // Move to next card every 3 seconds
-
-    return () => clearInterval(interval);
-  }, [projects.length]);
-
+  
   if (projects.length === 0) {
     return <div className="py-20 text-center">Loading projects...</div>;
   }
@@ -66,8 +50,9 @@ export default function Showcase() {
         {/* Auto-scrolling showcase */}
         <div className="relative overflow-hidden">
           <div 
-            className="flex transition-transform duration-1000 ease-in-out"
-            style={{ transform: `translateX(-${scrollPosition}%)` }}
+            className={`flex animate-marquee ${isPaused ? 'paused' : ''}`}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
           >
             {[...projects, ...projects, ...projects].map((project, index) => (
               <div key={`${project.id}-${index}`} className="w-full md:w-1/3 flex-shrink-0 px-4">

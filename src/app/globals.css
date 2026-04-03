@@ -27,3 +27,21 @@ body {
 .dark-purple-gradient {
   background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 50%, #6d28d9 100%);
 }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 4s linear infinite;
+  animation-play-state: running;
+}
+
+.animate-marquee.paused {
+  animation-play-state: paused;
+}

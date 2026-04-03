@@ -23,6 +23,15 @@ export default function AdminDashboard() {
     description: '',
     image: ''
   });
+  
+  // Hero and About image states
+  const [heroImage, setHeroImage] = useState('');
+  const [aboutImage, setAboutImage] = useState('');
+  const [heroSelectedImage, setHeroSelectedImage] = useState<File | null>(null);
+  const [aboutSelectedImage, setAboutSelectedImage] = useState<File | null>(null);
+  const [heroImagePreview, setHeroImagePreview] = useState<string>('');
+  const [aboutImagePreview, setAboutImagePreview] = useState<string>('');
+  
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [editSelectedImage, setEditSelectedImage] = useState<File | null>(null);
@@ -31,6 +40,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchProjects();
+      fetchHeroAboutImages();
     }
   }, [isAuthenticated]);
 
@@ -41,6 +51,17 @@ export default function AdminDashboard() {
       setProjects(data);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
+    }
+  };
+
+  const fetchHeroAboutImages = async () => {
+    try {
+      const response = await fetch('/api/hero-about');
+      const data = await response.json();
+      setHeroImage(data.heroImage || '');
+      setAboutImage(data.aboutImage || '');
+    } catch (error) {
+      console.error('Failed to fetch hero/about images:', error);
     }
   };
 
@@ -157,6 +178,74 @@ export default function AdminDashboard() {
         console.error('Delete error:', error);
         alert('Failed to delete project');
       }
+    }
+  };
+
+  const handleSaveHeroAboutImages = async () => {
+    try {
+      let heroImageUrl = heroImage;
+      let aboutImageUrl = aboutImage;
+
+      // Handle hero image upload
+      if (heroSelectedImage) {
+        const formData = new FormData();
+        formData.append('file', heroSelectedImage);
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          heroImageUrl = uploadData.url;
+        } else {
+          alert('Failed to upload hero image');
+          return;
+        }
+      }
+
+      // Handle about image upload
+      if (aboutSelectedImage) {
+        const formData = new FormData();
+        formData.append('file', aboutSelectedImage);
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          aboutImageUrl = uploadData.url;
+        } else {
+          alert('Failed to upload about image');
+          return;
+        }
+      }
+
+      // Save to database
+      const response = await fetch('/api/hero-about', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          heroImage: heroImageUrl,
+          aboutImage: aboutImageUrl
+        })
+      });
+
+      if (response.ok) {
+        setHeroSelectedImage(null);
+        setAboutSelectedImage(null);
+        setHeroImagePreview('');
+        setAboutImagePreview('');
+        alert('Images saved successfully!');
+      } else {
+        alert('Failed to save images');
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('Failed to save images');
     }
   };
 
@@ -292,6 +381,85 @@ export default function AdminDashboard() {
           >
             <LogOut className="w-4 h-4" />
             Logout
+          </button>
+        </div>
+
+        {/* Hero & About Image Management */}
+        <div className="bg-purple-900/20 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 mb-8">
+          <h2 className="text-2xl font-serif mb-4">Hero & About Images</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Hero Image */}
+            <div>
+              <h3 className="text-lg font-serif text-white mb-2">Hero Background</h3>
+              <p className="text-purple-300 text-sm mb-3">Recommended: 1920x1080px</p>
+              {heroImage && (
+                <div className="mb-3">
+                  <img src={heroImage} alt="Current hero" className="w-full h-32 object-cover rounded" />
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setHeroSelectedImage(file);
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                      setHeroImagePreview(e.target?.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="w-full px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white file:mr-4 file:py-2"
+              />
+              {heroImagePreview && (
+                <div className="mt-3">
+                  <p className="text-purple-300 text-sm mb-2">Preview:</p>
+                  <img src={heroImagePreview} alt="Hero preview" className="w-full h-32 object-cover rounded" />
+                </div>
+              )}
+            </div>
+
+            {/* About Image */}
+            <div>
+              <h3 className="text-lg font-serif text-white mb-2">About Section Image</h3>
+              <p className="text-purple-300 text-sm mb-3">Recommended: 600x400px</p>
+              {aboutImage && (
+                <div className="mb-3">
+                  <img src={aboutImage} alt="Current about" className="w-full h-32 object-cover rounded" />
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setAboutSelectedImage(file);
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                      setAboutImagePreview(e.target?.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="w-full px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white file:mr-4 file:py-2"
+              />
+              {aboutImagePreview && (
+                <div className="mt-3">
+                  <p className="text-purple-300 text-sm mb-2">Preview:</p>
+                  <img src={aboutImagePreview} alt="About preview" className="w-full h-32 object-cover rounded" />
+                </div>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleSaveHeroAboutImages}
+            className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
+          >
+            <Save className="w-4 h-4" />
+            Save Images
           </button>
         </div>
 
