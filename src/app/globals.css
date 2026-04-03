@@ -42,6 +42,19 @@ body {
   animation-play-state: running;
 }
 
+/* Faster animation on mobile for consistent speed */
+@media (max-width: 768px) {
+  .animate-marquee {
+    animation: marquee 3s linear infinite;
+  }
+}
+
+@media (max-width: 480px) {
+  .animate-marquee {
+    animation: marquee 2s linear infinite;
+  }
+}
+
 .animate-marquee.paused {
   animation-play-state: paused;
 }
