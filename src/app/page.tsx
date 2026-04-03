@@ -4,11 +4,11 @@ import Showcase from '@/components/Showcase';
 import OtherPassions from '@/components/OtherPassions';
 import Footer from '@/components/Footer';
 
-export default function Home() {
+export default function Home({ heroImage, aboutImage }: { heroImage?: string; aboutImage?: string }) {
   return (
     <div className="min-h-screen bg-black text-white">
-      <Hero />
-      <About />
+      <Hero heroImage={heroImage} />
+      <About aboutImage={aboutImage} />
       <Showcase />
       <OtherPassions />
       <Footer />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ArrowDown } from 'lucide-react';
 
 export default function About() {
   const skills = [
@@ -11,15 +12,22 @@ export default function About() {
     'Substance Painter'
   ];
 
-  const [aboutImage, setAboutImage] = useState('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=600&h=400&fit=crop');
+  const [aboutImage, setAboutImage] = useState('');
 
   useEffect(() => {
     fetchAboutImage();
+    
+    // Poll for updates every 2 seconds
+    const interval = setInterval(() => {
+      fetchAboutImage();
+    }, 2000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchAboutImage = async () => {
     try {
-      const response = await fetch('/api/hero-about');
+      const response = await fetch(`/api/hero-about?t=${Date.now()}`);
       const data = await response.json();
       if (data.aboutImage) {
         setAboutImage(data.aboutImage);
@@ -61,11 +69,13 @@ export default function About() {
           {/* Right image */}
           <div className="relative">
             <div className="rounded-lg overflow-hidden shadow-2xl">
-              <img
-                src={aboutImage}
-                alt="Workspace with dual monitors"
-                className="w-full h-auto"
-              />
+              {aboutImage && (
+                <img
+                  src={aboutImage}
+                  alt="Workspace with dual monitors"
+                  className="w-full h-auto"
+                />
+              )}
             </div>
           </div>
         </div>

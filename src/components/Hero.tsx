@@ -4,15 +4,22 @@ import { useState, useEffect } from 'react';
 import { ArrowDown } from 'lucide-react';
 
 export default function Hero() {
-  const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=1920&h=1080&fit=crop');
+  const [heroImage, setHeroImage] = useState('');
 
   useEffect(() => {
     fetchHeroImage();
+    
+    // Poll for updates every 2 seconds
+    const interval = setInterval(() => {
+      fetchHeroImage();
+    }, 2000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchHeroImage = async () => {
     try {
-      const response = await fetch('/api/hero-about');
+      const response = await fetch(`/api/hero-about?t=${Date.now()}`);
       const data = await response.json();
       if (data.heroImage) {
         setHeroImage(data.heroImage);
@@ -27,7 +34,6 @@ export default function Hero() {
       {/* Background with overlay */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-purple-900/90 via-purple-800/80 to-black/90"></div>
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=1920&h=1080&fit=crop')] bg-cover bg-center opacity-30"></div>
         {heroImage && (
           <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: `url(${heroImage})` }}></div>
         )}
