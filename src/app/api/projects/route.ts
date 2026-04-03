@@ -114,16 +114,27 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = parseInt(searchParams.get('id') || '');
     
+    console.log('DELETE request received for ID:', id);
+    
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
+    }
+    
     const projects = readProjects();
+    console.log('Current projects:', projects.length);
+    
     const filteredProjects = projects.filter((p: any) => p.id !== id);
+    console.log('After filtering:', filteredProjects.length);
     
     if (projects.length === filteredProjects.length) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
     
     writeProjects(filteredProjects);
-    return NextResponse.json({ success: true });
+    console.log('Project deleted successfully');
+    return NextResponse.json({ success: true, message: 'Project deleted successfully' });
   } catch (error) {
+    console.error('Delete error:', error);
     return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
   }
 }

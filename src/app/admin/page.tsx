@@ -87,13 +87,20 @@ export default function AdminDashboard() {
   const handleDeleteProject = async (id: number) => {
     if (confirm('Are you sure you want to delete this project?')) {
       try {
+        console.log('Deleting project with ID:', id);
         const response = await fetch(`/api/projects?id=${id}`, {
           method: 'DELETE'
         });
+        console.log('Delete response:', response.status);
         if (response.ok) {
           fetchProjects();
+          alert('Project deleted successfully!');
+        } else {
+          const errorData = await response.json();
+          alert(`Failed to delete project: ${errorData.error || 'Unknown error'}`);
         }
       } catch (error) {
+        console.error('Delete error:', error);
         alert('Failed to delete project');
       }
     }

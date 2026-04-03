@@ -18,6 +18,11 @@ export default function Showcase() {
 
   useEffect(() => {
     fetchProjects();
+    
+    // Set up polling to check for updates every 5 seconds
+    const interval = setInterval(fetchProjects, 5000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchProjects = async () => {
