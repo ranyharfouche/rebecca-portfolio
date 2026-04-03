@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
-// Initial projects data
+// Initial projects data for seeding
 const initialProjects = [
   {
     id: 1,
@@ -36,49 +37,47 @@ const initialProjects = [
   }
 ];
 
-// Fallback in-memory storage for immediate functionality
-let fallbackProjects = [...initialProjects];
-
-// Hybrid storage: Try KV first, fallback to memory
-async function readProjects() {
+// Initialize database with seed data if empty
+async function initializeDatabase() {
   try {
-    // Try Vercel KV if available
-    if (process.env.KV_URL) {
-      const { kv } = await import('@vercel/kv');
-      let projects = await kv.get('projects');
-      if (!projects) {
-        await kv.set('projects', JSON.stringify(initialProjects));
-        projects = await kv.get('projects');
+    const { data, error } = await supabase
+      .from('projects')
+      .select('count')
+      .single();
+    
+    if (error || !data || data.count === 0) {
+      console.log('Initializing database with seed data');
+      const { error: insertError } = await supabase
+        .from('projects')
+        .insert(initialProjects);
+      
+      if (insertError) {
+        console.error('Failed to initialize database:', insertError);
+      } else {
+        console.log('Database initialized successfully');
       }
-      return JSON.parse(projects as string);
     }
   } catch (error) {
-    console.log('KV not available, using fallback storage');
+    console.error('Database initialization error:', error);
   }
-  
-  // Fallback to in-memory
-  return fallbackProjects;
-}
-
-async function writeProjects(newProjects: any[]) {
-  try {
-    // Try Vercel KV if available
-    if (process.env.KV_URL) {
-      const { kv } = await import('@vercel/kv');
-      await kv.set('projects', JSON.stringify(newProjects));
-    }
-  } catch (error) {
-    console.log('KV not available, using fallback storage');
-  }
-  
-  // Always update fallback
-  fallbackProjects = [...newProjects];
 }
 
 export async function GET() {
   try {
-    const projectsData = await readProjects();
-    return NextResponse.json(projectsData);
+    // Initialize if needed
+    await initializeDatabase();
+    
+    const { data: projects, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('id');
+    
+    if (error) {
+      console.error('GET error:', error);
+      return NextResponse.json({ error: 'Failed to read projects' }, { status: 500 });
+    }
+    
+    return NextResponse.json(projects || []);
   } catch (error) {
     console.error('GET error:', error);
     return NextResponse.json({ error: 'Failed to read projects' }, { status: 500 });
@@ -88,15 +87,17 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const project = await request.json();
-    const projectsData = await readProjects();
     
-    const newProject = {
-      ...project,
-      id: Date.now(),
-    };
+    const { data: newProject, error } = await supabase
+      .from('projects')
+      .insert([project])
+      .select()
+      .single();
     
-    projectsData.push(newProject);
-    await writeProjects(projectsData);
+    if (error) {
+      console.error('POST error:', error);
+      return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
+    }
     
     return NextResponse.json(newProject);
   } catch (error) {
@@ -108,17 +109,20 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const updatedProject = await request.json();
-    const projectsData = await readProjects();
     
-    const index = projectsData.findIndex((p: any) => p.id === updatedProject.id);
-    if (index === -1) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    const { data: project, error } = await supabase
+      .from('projects')
+      .update(updatedProject)
+      .eq('id', updatedProject.id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('PUT error:', error);
+      return NextResponse.json({ error: 'Failed to update project' }, { status: 500 });
     }
     
-    projectsData[index] = updatedProject;
-    await writeProjects(projectsData);
-    
-    return NextResponse.json(updatedProject);
+    return NextResponse.json(project);
   } catch (error) {
     console.error('PUT error:', error);
     return NextResponse.json({ error: 'Failed to update project' }, { status: 500 });
@@ -136,17 +140,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
     }
     
-    const projectsData = await readProjects();
-    console.log('Current projects:', projectsData.length);
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', id);
     
-    const filteredProjects = projectsData.filter((p: any) => p.id !== id);
-    console.log('After filtering:', filteredProjects.length);
-    
-    if (projectsData.length === filteredProjects.length) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    if (error) {
+      console.error('DELETE error:', error);
+      return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
     }
     
-    await writeProjects(filteredProjects);
     console.log('Project deleted successfully');
     return NextResponse.json({ success: true, message: 'Project deleted successfully' });
   } catch (error) {
