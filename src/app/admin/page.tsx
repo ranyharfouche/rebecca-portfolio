@@ -451,31 +451,6 @@ export default function AdminDashboard() {
                         <span className="text-purple-300 text-sm">Project Image (Recommended: 1200x800px, Max 5MB)</span>
                       </label>
                       
-                      {/* Show current image */}
-                      {editingProject.image && !editImagePreview && (
-                        <div className="mb-4 p-3 bg-purple-900/20 border border-purple-500/20 rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <img
-                              src={editingProject.image}
-                              alt="Current project image"
-                              className="w-24 h-24 object-cover rounded-lg border-2 border-purple-500/30"
-                            />
-                            <div className="flex-1">
-                              <p className="text-sm text-purple-300 mb-2">Current image:</p>
-                              <p className="text-xs text-purple-400 truncate">{editingProject.image}</p>
-                            </div>
-                            <button
-                              onClick={() => {
-                                setEditImagePreview(''); // Clear preview to trigger file selection
-                              }}
-                              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                            >
-                              Replace
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      
                       {/* Show new image selection */}
                       {editImagePreview && (
                         <div className="border-2 border-purple-500/30 rounded-lg p-3 mb-4">
@@ -497,19 +472,26 @@ export default function AdminDashboard() {
                         </div>
                       )}
                       
-                      {/* File input - only show if replacing or no current image */}
-                      {(!editingProject.image || editImagePreview) && (
-                        <div className="flex gap-4 items-start">
-                          <div className="flex-1">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleEditImageSelect}
-                              className="w-full px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
-                            />
-                          </div>
+                      {/* File input - always show when replacing */}
+                      <div className="flex gap-4 items-start">
+                        <div className="flex-1">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleEditImageSelect}
+                            className="w-full px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                          />
                         </div>
-                      )}
+                        <button
+                          onClick={() => {
+                            setEditImagePreview(''); // Clear preview to trigger file selection
+                            setEditSelectedImage(null);
+                          }}
+                          className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                          Replace Image
+                        </button>
+                      </div>
                     </div>
                     
                     <input
