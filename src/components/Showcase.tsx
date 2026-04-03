@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Info } from 'lucide-react';
+import { Info, X } from 'lucide-react';
 
 interface Project {
   id: number;
@@ -14,6 +14,7 @@ interface Project {
 export default function Showcase() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -90,7 +91,10 @@ export default function Showcase() {
                     <p className="text-white/70 text-sm mb-4 line-clamp-3">{project.description}</p>
                     
                                         
-                    <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors duration-300">
+                    <button 
+                      onClick={() => setSelectedProject(project)}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors duration-300"
+                    >
                       <Info className="w-4 h-4" />
                       Details
                     </button>
@@ -101,6 +105,57 @@ export default function Showcase() {
           </div>
         </div>
       </div>
+
+      {/* Popup Modal */}
+      {selectedProject && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedProject(null)}
+        >
+          <div 
+            className="bg-purple-900/90 backdrop-blur-md border border-purple-500/30 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative">
+              {/* Close button */}
+              <button
+                onClick={() => setSelectedProject(null)}
+                className="absolute top-4 right-4 bg-purple-600/80 hover:bg-purple-700 text-white p-2 rounded-full transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Project Image */}
+              <div className="h-64 md:h-96 overflow-hidden">
+                {selectedProject.image ? (
+                  <img
+                    src={selectedProject.image}
+                    alt={selectedProject.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-purple-800/30 flex items-center justify-center">
+                    <div className="text-purple-400 text-6xl">📁</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Project Details */}
+              <div className="p-6 md:p-8">
+                <h2 className="text-3xl md:text-4xl font-serif text-white mb-2">
+                  {selectedProject.title}
+                </h2>
+                <p className="text-purple-300 text-lg mb-6">
+                  {selectedProject.category}
+                </p>
+                <p className="text-white/90 text-base leading-relaxed whitespace-pre-wrap">
+                  {selectedProject.description}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
