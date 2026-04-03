@@ -40,13 +40,14 @@ export default function Showcase() {
     
     const interval = setInterval(() => {
       setScrollPosition((prev) => {
-        const maxScroll = projects.length - 3;
+        const cardWidth = 33.333; // 33.333% for 3 cards visible
+        const maxScroll = projects.length * cardWidth;
         if (prev >= maxScroll) {
           return 0;
         }
-        return prev + 1;
+        return prev + cardWidth;
       });
-    }, 4000); // Slower, more elegant scroll
+    }, 3000); // Move to next card every 3 seconds
 
     return () => clearInterval(interval);
   }, [projects.length]);
@@ -66,17 +67,23 @@ export default function Showcase() {
         <div className="relative overflow-hidden">
           <div 
             className="flex transition-transform duration-1000 ease-in-out"
-            style={{ transform: `translateX(-${scrollPosition * 33.333}%)` }}
+            style={{ transform: `translateX(-${scrollPosition}%)` }}
           >
             {[...projects, ...projects, ...projects].map((project, index) => (
               <div key={`${project.id}-${index}`} className="w-full md:w-1/3 flex-shrink-0 px-4">
                 <div className="bg-purple-900/20 backdrop-blur-sm border border-purple-500/20 rounded-lg overflow-hidden hover:border-purple-400/40 transition-all duration-300">
                   <div className="h-48 overflow-hidden">
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover"
-                    />
+                    {project.image ? (
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-purple-800/30 flex items-center justify-center">
+                        <div className="text-purple-400 text-4xl">📁</div>
+                      </div>
+                    )}
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-serif text-white mb-2">{project.title}</h3>
